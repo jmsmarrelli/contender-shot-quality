@@ -1,0 +1,4 @@
+spec,features,log_loss,brier,auc,seconds
+geo,"dist, abs_x, y, angle, is_three",0.65344,0.23083,0.63433,89.5
+full,"dist, abs_x, y, angle, secs_left, is_three, is_home, family, period",0.63609,0.22352,0.66506,158.4
+constant,league make rate,0.69022,0.24854,0.5,0.0
