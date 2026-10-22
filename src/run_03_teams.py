@@ -37,9 +37,9 @@ def load(spec: str = "geo") -> pd.DataFrame:
 
 def contender_view(off: pd.DataFrame, deff: pd.DataFrame, season: int) -> pd.DataFrame:
     rows = []
-    for side, tbl in (("offense", off), ("defense", deff)):
+    for side, tbl in (("offence", off), ("defence", deff)):
         sel = tbl[tbl["season"] == season].copy()
-        asc = side == "defense"
+        asc = side == "defence"
         sel["quality_rank"] = sel["quality"].rank(ascending=asc, method="min").astype(int)
         sel["making_rank"] = sel["making"].rank(ascending=asc, method="min").astype(int)
         sel["total_rank"] = sel["total"].rank(ascending=asc, method="min").astype(int)
@@ -56,12 +56,12 @@ def spec_sensitivity(season: int) -> pd.DataFrame:
     frames = {}
     for spec in ("geo", "full"):
         d = load(spec)
-        for side in ("offense", "defense"):
+        for side in ("offence", "defence"):
             t = quality.side_table(d, side)
             t = t[t["season"] == season].set_index("team")
             frames[(spec, side)] = t[["quality", "making"]]
     rows = []
-    for side in ("offense", "defense"):
+    for side in ("offence", "defence"):
         g, f = frames[("geo", side)], frames[("full", side)]
         j = g.join(f, lsuffix="_geo", rsuffix="_full")
         for comp in ("quality", "making"):
@@ -114,7 +114,7 @@ def redraw() -> None:
     yard = pd.read_csv(OUT / "season_yardstick.csv")
 
     series_att = int(curve.loc[~curve["half_size"].isin(SIZES), "half_size"].iloc[0])
-    rel_season = float(half.loc[half["side"] == "offense", "making_full"].iloc[0])
+    rel_season = float(half.loc[half["side"] == "offence", "making_full"].iloc[0])
     rel_series = float(curve.loc[curve["half_size"] == series_att, "making_half"].iloc[0])
 
     fg.draw_all(off=off, deff=deff, view=view, curve=curve, sim=sim, adj=adj,
@@ -127,8 +127,8 @@ def main() -> None:
     d = load("geo")
     print(f"{len(d):,} scored attempts, {d['season'].min()}-{d['season'].max()}", flush=True)
 
-    off = quality.side_table(d, "offense")
-    deff = quality.side_table(d, "defense")
+    off = quality.side_table(d, "offence")
+    deff = quality.side_table(d, "defence")
     for t, n in ((off, "team_offence"), (deff, "team_defence")):
         t.round(4).to_csv(OUT / f"{n}.csv", index=False)
 
@@ -138,35 +138,35 @@ def main() -> None:
 
     # --- how much of this is real -----------------------------------------
     half = pd.DataFrame([quality.split_half(d, s, n_splits=N_SPLITS, seed=SEED)
-                         for s in ("offense", "defense")]).round(4)
+                         for s in ("offence", "defence")]).round(4)
     half.to_csv(OUT / "split_half.csv", index=False)
     print("\n" + half.to_string(index=False), flush=True)
 
     # A seven-game series' worth of attempts is put on the curve explicitly
     # rather than read off between two points.
-    per_game = quality.attempts_per_game(d, REPORT_SEASON, "offense")
+    per_game = quality.attempts_per_game(d, REPORT_SEASON, "offence")
     series_att = int(round(per_game * SERIES_GAMES))
     sizes = sorted(set(SIZES + [series_att]))
-    curve = quality.reliability_curve(d, "offense", sizes, n_splits=60, seed=SEED).round(4)
+    curve = quality.reliability_curve(d, "offence", sizes, n_splits=60, seed=SEED).round(4)
     curve.to_csv(OUT / "reliability_curve.csv", index=False)
     print(f"\n{per_game:.1f} attempts per team-game, {series_att} in a full series")
     print(curve.to_string(index=False), flush=True)
 
-    noise = quality.noise_share(d, "offense").round(4)
+    noise = quality.noise_share(d, "offence").round(4)
     noise.to_csv(OUT / "noise_share.csv", index=False)
     print("\n" + noise.to_string(index=False), flush=True)
 
     rel = {side: {c: float(half.loc[half["side"] == side, f"{c}_full"].iloc[0])
                   for c in ("quality", "making", "total")}
-           for side in ("offense", "defense")}
-    yoy = pd.concat([quality.year_over_year(off, rel["offense"]),
-                     quality.year_over_year(deff, rel["defense"])],
+           for side in ("offence", "defence")}
+    yoy = pd.concat([quality.year_over_year(off, rel["offence"]),
+                     quality.year_over_year(deff, rel["defence"])],
                     ignore_index=True).round(4)
     yoy.to_csv(OUT / "year_over_year.csv", index=False)
     print("\n" + yoy.to_string(index=False), flush=True)
 
     # --- what a seven-game sample does ------------------------------------
-    sim = quality.series_noise(d, REPORT_SEASON, "offense", series_att,
+    sim = quality.series_noise(d, REPORT_SEASON, "offence", series_att,
                                n_sims=4000, seed=SEED).round(3)
     sim.to_csv(OUT / "series_noise.csv", index=False)
     print("\n" + sim.to_string(index=False), flush=True)
@@ -174,7 +174,7 @@ def main() -> None:
     # Two shrinkages, on the same season. The first uses the reliability a full
     # season of attempts earns; the second uses the reliability a single series
     # earns. The gap between them is the point of the whole exercise.
-    rel_season = float(half.loc[half["side"] == "offense", "making_full"].iloc[0])
+    rel_season = float(half.loc[half["side"] == "offence", "making_full"].iloc[0])
     row = curve[curve["half_size"] == series_att].iloc[0]
     rel_series = float(row["making_half"])
     rel_series_q = float(row["quality_half"])

@@ -1,5 +1,5 @@
 side,component,pearson_r,spearman_r,mean_abs_gap,max_rank_move
-offense,quality,0.9324,0.9066,0.496,11
-offense,making,0.9878,0.968,0.496,6
-defense,quality,0.9745,0.9662,0.35,7
-defense,making,0.9866,0.9858,0.35,3
+offence,quality,0.9337,0.907,0.491,11
+offence,making,0.988,0.9689,0.491,5
+defence,quality,0.9741,0.968,0.355,7
+defence,making,0.9865,0.9844,0.355,3

@@ -13,7 +13,7 @@ season, which makes them add up:
 
 with `quality = e - L_e`, `making = (a - e) - (L_a - L_e)` and
 `total = a - L_a`, where a and e are the team's actual and expected points per
-attempt and L is the league's. Centering making on the league's own residual
+attempt and L is the league's. Centring making on the league's own residual
 matters: the model carries no season term, so the league's residual is not zero
 in any given year, and skipping that step would quietly hand every team the
 league's era drift.
@@ -24,7 +24,7 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-SIDE_KEY = {"offense": "team_abbrev", "defense": "opponent"}
+SIDE_KEY = {"offence": "team_abbrev", "defence": "opponent"}
 
 
 def league_baseline(scored: pd.DataFrame) -> pd.DataFrame:
@@ -36,10 +36,10 @@ def league_baseline(scored: pd.DataFrame) -> pd.DataFrame:
     )
 
 
-def side_table(scored: pd.DataFrame, side: str = "offense") -> pd.DataFrame:
+def side_table(scored: pd.DataFrame, side: str = "offence") -> pd.DataFrame:
     """One row per team-season, on the chosen side of the ball.
 
-    On defense the sign convention is kept as-is rather than flipped: a positive
+    On defence the sign convention is kept as-is rather than flipped: a positive
     number means the opponent scored more than the league does, so *lower is
     better*. Flipping it here would make the arithmetic above stop adding up.
     """
@@ -230,7 +230,7 @@ def series_noise(scored: pd.DataFrame, season: int, side: str, attempts: int,
     return pd.DataFrame(rows).sort_values("season_making", ascending=False)
 
 
-def attempts_per_game(scored: pd.DataFrame, season: int, side: str = "offense") -> float:
+def attempts_per_game(scored: pd.DataFrame, season: int, side: str = "offence") -> float:
     key = SIDE_KEY[side]
     sel = scored[scored["season"] == season]
     per = sel.groupby([key, "game_id"], observed=True).size()

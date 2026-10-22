@@ -24,9 +24,9 @@ DIV = LinearSegmentedColormap.from_list("div", st.DIVERGING[::-1])
 # A few contenders land close enough together in 2024-25 that their labels would
 # sit on top of each other. Nudges are in points, and only these five are moved.
 LABEL_NUDGE = {
-    ("offense", "LAL"): (-19, 4), ("offense", "OKC"): (17, 6),
-    ("defense", "LAL"): (-19, 4), ("defense", "DEN"): (12, 7),
-    ("defense", "SAS"): (24, -3),
+    ("offence", "LAL"): (-19, 4), ("offence", "OKC"): (17, 6),
+    ("defence", "LAL"): (-19, 4), ("defence", "DEN"): (12, 7),
+    ("defence", "SAS"): (24, -3),
 }
 
 ZONE_ORDER = ["Restricted Area", "In The Paint (Non-RA)", "Mid-Range",
@@ -49,7 +49,7 @@ def _team_colour(team: str) -> str:
 # --------------------------------------------------------------------------
 def fig_scatter(off: pd.DataFrame, deff: pd.DataFrame) -> None:
     fig, axes = plt.subplots(1, 2, figsize=(11.4, 5.3))
-    panels = [("offense", off, "Offense", "better"), ("defense", deff, "Defense", "worse")]
+    panels = [("offence", off, "Offence", "better"), ("defence", deff, "Defence", "worse")]
 
     both = pd.concat([off, deff])
     both = both[both["season"] == REPORT_SEASON]
@@ -88,7 +88,7 @@ def fig_scatter(off: pd.DataFrame, deff: pd.DataFrame) -> None:
     st.caption(fig,
                f"Points per 100 attempts against the {REPORT_SEASON - 1}-{str(REPORT_SEASON)[2:]} "
                "league. Quality is the expected value of the shots taken, scored out of fold by a "
-               "model of geometry alone; making is what the shooters did with them. On the defense "
+               "model of geometry alone; making is what the shooters did with them. On the defence "
                "panel both axes are what the opponent got, so down and left is the good corner.",
                y=-0.06)
     fig.savefig(FIG / "01_quality_and_making.png")
@@ -106,7 +106,7 @@ def fig_reliability(curve: pd.DataFrame, series_att: int) -> None:
             label="shot making")
 
     ax.axvline(series_att, color=st.INK_2, lw=1.0, ls=(0, (4, 3)), zorder=1)
-    ax.annotate(f"a seven-game series\n{series_att} attempts",
+    ax.annotate(f"an illustrative sample\n{series_att} attempts",
                 (series_att, 0.03), xytext=(9, 0), textcoords="offset points",
                 fontsize=8.2, color=st.INK_2, va="bottom")
 
@@ -126,17 +126,11 @@ def fig_reliability(curve: pd.DataFrame, series_att: int) -> None:
     ax.set_xlabel("attempts in each half")
     ax.set_ylabel("correlation between the two halves")
     ax.legend(loc="lower right")
-    st.titled(ax, "How long it takes to see either half of an offense",
+    st.titled(ax, "Within-season split-sample consistency",
               "two disjoint samples from the same team-season, averaged over 60 random splits")
     st.strip(ax)
     small = curve.iloc[0]
-    st.caption(fig,
-               f"{int(curve['team_seasons'].iloc[0])} team-seasons from 2010-11 to 2024-25, each "
-               "with enough attempts to supply the largest split, so the sample of teams is the "
-               f"same at every point on the curve. At {int(small['half_size'])} attempts - under two "
-               f"games - quality already repeats at {small['quality_half']:.2f} and making at "
-               f"{small['making_half']:.2f}.",
-               y=-0.02)
+    st.caption(fig, 'Two disjoint random samples of attempts from the same team-season. These are spread across a season, not consecutive games or an early-season forecast. The common eligible team-season cohort is fixed across sample sizes.')
     fig.savefig(FIG / "02_reliability_curve.png")
     plt.close(fig)
 
@@ -151,8 +145,8 @@ def fig_contender_bars(view: pd.DataFrame) -> None:
     rows and the total goes in the label.
     """
     fig, axes = plt.subplots(1, 2, figsize=(11.6, 5.2), sharex=True)
-    for ax, side in zip(axes, ("offense", "defense")):
-        best_first = side == "offense"
+    for ax, side in zip(axes, ("offence", "defence")):
+        best_first = side == "offence"
         sel = view[view["side"] == side].sort_values("total", ascending=not best_first)
         sel = sel.iloc[::-1]                      # barh draws upward from zero
         y = np.arange(len(sel))
@@ -169,7 +163,7 @@ def fig_contender_bars(view: pd.DataFrame) -> None:
             tick.set_fontweight("bold" if team == SUBJECT else "semibold")
         ax.set_ylim(-0.62, len(sel) - 0.38)
         ax.set_xlim(-8.4, 8.4)
-        sub = ("best at the top; up is more scoring" if side == "offense"
+        sub = ("best at the top; up is more scoring" if side == "offence"
                else "best at the top; up is more scoring allowed")
         st.titled(ax, side.capitalize(), sub)
         ax.set_xlabel("points per 100 attempts vs league")
@@ -182,7 +176,7 @@ def fig_contender_bars(view: pd.DataFrame) -> None:
     st.caption(fig,
                f"{REPORT_SEASON - 1}-{str(REPORT_SEASON)[2:]}. The number beside each team is the "
                "two bars added together. San Antonio is the clearest case of the two pulling "
-               "against each other: the sixth-best looks in the league on offense, and 20th at "
+               "against each other: the sixth-best looks in the league on offence, and 20th at "
                "converting them.",
                y=-0.03)
     fig.savefig(FIG / "03_contender_split.png")
@@ -214,7 +208,7 @@ def fig_series_bands(sim: pd.DataFrame, series_att: int) -> None:
             tick.set_color(_team_colour(team))
     ax.set_ylim(-0.8, len(sel) - 0.2)
     ax.set_xlabel("shot making, points per 100 attempts vs league")
-    st.titled(ax, "A series is not long enough to tell these teams apart",
+    st.titled(ax, "Uncertainty in independent shot resamples",
               f"dot: the {REPORT_SEASON - 1}-{str(REPORT_SEASON)[2:]} season figure. bar: the middle "
               f"90% of {series_att}-attempt resamples of that same season")
     st.strip(ax, keep=("bottom",))
@@ -222,12 +216,7 @@ def fig_series_bands(sim: pd.DataFrame, series_att: int) -> None:
     covers = int(((sel["p05"] <= 0) & (sel["p95"] >= 0)).sum())
     ends = "even the top and bottom bands overlap" if sel["p05"].iloc[0] <= sel["p95"].iloc[-1] \
         else "the top and bottom bands are the only pair that do not overlap"
-    st.caption(fig,
-               "Nothing changes between the dot and the bar except how many of the team's own "
-               f"attempts you get to see. {covers} of the {len(sel)} bands cover zero, and {ends}: "
-               "over a series, the league's best shot-making team and its worst are not "
-               "distinguishable from each other.",
-               y=-0.02)
+    st.caption(fig, 'Independent resamples from each team’s observed regular-season shots. This illustrative sample-size exercise omits opponent adjustments, within-game dependence, changing rotations and playoff tactics. Overlapping bands do not establish equality or simulate a playoff series.')
     fig.savefig(FIG / "04_series_bands.png")
     plt.close(fig)
 
