@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Method</title>
-<meta name="description" content="Longer notes on the choices that move results. The README has the findings; this is the argument for believing them, and the places where I do not.">
+<title>Method and revision notes</title>
+<meta name="description" content="A team can score efficiently because of the attempts it generates, how it converts them, or both. This study separates a shot-model expectation from actual-minus-expected scoring a">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
 <style>
 :root{
@@ -99,291 +99,29 @@ figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);bor
 </style>
 </head>
 <body>
-<header class="bar"><div class="wrap"><span class="slug">contender-shot-quality</span><nav><a href="../index.html">findings</a><a href="https://github.com/jmsmarrelli/contender-shot-quality">repository</a><a href="https://jmsmarrelli.github.io/basketball-analytics/">all projects</a></nav></div></header>
+<header class="bar"><div class="wrap"><span class="slug">contender-shot-quality</span><nav><a href="../index.html">findings</a></nav></div></header>
 <main><div class="wrap">
-<h1>Method</h1>
-<p>Longer notes on the choices that move results. The README has the findings; this
-is the argument for believing them, and the places where I do not.</p>
-<hr>
-<h2>1. The estimand</h2>
-<p>For a team-season on one side of the ball, with <code>a</code> and <code>e</code> the mean actual and
-expected points per attempt and <code>L_a</code>, <code>L_e</code> the same for the league in that
-season:</p>
-<pre><code>quality = 100 (e - L_e)
-making  = 100 [(a - e) - (L_a - L_e)]
-total   = 100 (a - L_a) = quality + making
-</code></pre>
-<p>The bracketed subtraction in <code>making</code> is not cosmetic. The model carries no
-season term, so the league's own residual <code>L_a - L_e</code> is nonzero and drifts — it
-runs from −0.007 points per attempt in 2010-11 to +0.053 in 2024-25
-(<code>output/season_yardstick.csv</code>). Omitting it would hand every team in 2024-25 five
-extra points per 100 of "shot making" that is really the league's era drift, and
-the three lines above would stop adding up.</p>
-<p>On defense the same formulas are applied to the shots a team faced, and the sign
-convention is <em>not</em> flipped. A positive defensive number means the opponent got
-more than the league average. Flipping it for readability would break the
-identity.</p>
-<hr>
-<h2>2. The model</h2>
-<p><code>HistGradientBoostingClassifier</code> on <code>P(make)</code>, times 2 or 3.</p>
-<p><strong>Out of fold, with folds grouped by game.</strong> Five <code>GroupKFold</code> folds on
-<code>game_id</code>, so no attempt is ever scored by a model that saw another attempt from
-the same game. Splitting on rows instead would let the model memorise a game's
-particular shooting night and quietly move it from the residual into the
-expectation, which is exactly the quantity the project is trying to measure.</p>
-<p><strong>No season feature.</strong> If season entered the model, the league's year-to-year
-change in conversion would be absorbed into the expectation and every team's
-making figure would be measured against a moving standard. Figure 06 is what that
-choice buys: the yardstick stays still and the league's own drift becomes
-visible.</p>
-<p><strong>Geometry only.</strong> The <code>geo</code> specification uses distance, court position
-(<code>abs_x</code>, <code>y</code>), angle, and whether the attempt is worth three. The alternative,
-<code>full</code>, adds action family, period, seconds left and venue. <code>full</code> is the better
-classifier — log loss 0.6361 against 0.6534, AUC 0.665 against 0.634 — and it is
-the wrong model here, because its best feature is a label whose meaning moved
-inside the sample. See section 3.</p>
-<p><strong>Calibration.</strong> Across twenty equal-count bins the geometry model's mean
-predicted and observed make rates differ by at most 0.0024
-(<code>output/calibration.csv</code>). A model can be well calibrated in aggregate and still
-be wrong in a corner of the floor; this says only that nothing is systematically
-off.</p>
-<hr>
-<h2>3. The action-label problem</h2>
-<p><code>output/action_labels.csv</code> is the share of attempts in each of eleven action
-families, by season. The interesting boundary is 2014-15 to 2015-16:</p>
-<div class="tw"><table>
-<thead>
-<tr>
-<th></th>
-<th>2014-15</th>
-<th>2015-16</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Jump shot</td>
-<td class="num">55.07%</td>
-<td class="num">48.20%</td>
-</tr>
-<tr>
-<td>Pull-up</td>
-<td class="num">3.50%</td>
-<td class="num">6.20%</td>
-</tr>
-<tr>
-<td>Floater</td>
-<td class="num">1.48%</td>
-<td class="num">3.84%</td>
-</tr>
-<tr>
-<td>Cut / roll layup</td>
-<td class="num">1.82%</td>
-<td class="num">4.39%</td>
-</tr>
-</tbody>
-</table></div>
-<p>Across the whole sample, "Layup" falls from 12.65% of all attempts to 1.58% and
-"Bank" from 1.39% to 0.17%, while "Driving layup" doubles. These are not changes
-in how the game is played over one summer. They are the league's play-by-play
-vocabulary splitting into finer categories, and the finer categories eat the
-coarse ones.</p>
-<p>A model that reads action type across that boundary learns some basketball and
-some calendar, and there is no way to tell from the fit which is which. Since
-geometry has a fixed meaning — the arc is in the same place in both files — the
-published model reads geometry.</p>
-<p>The cost of that choice is bounded rather than assumed. <code>run_03_teams.py</code> fits
-<code>full</code> as well and compares the 2024-25 team figures both ways
-(<code>output/spec_sensitivity.csv</code>):</p>
-<div class="tw"><table>
-<thead>
-<tr>
-<th>Side</th>
-<th>Component</th>
-<th>Pearson</th>
-<th>Spearman</th>
-<th>Mean gap</th>
-<th>Worst rank move</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Offense</td>
-<td>quality</td>
-<td class="num">0.932</td>
-<td class="num">0.907</td>
-<td class="num">0.50</td>
-<td class="num">11</td>
-</tr>
-<tr>
-<td>Offense</td>
-<td>making</td>
-<td class="num">0.988</td>
-<td class="num">0.968</td>
-<td class="num">0.50</td>
-<td class="num">6</td>
-</tr>
-<tr>
-<td>Defense</td>
-<td>quality</td>
-<td class="num">0.975</td>
-<td class="num">0.966</td>
-<td class="num">0.35</td>
-<td class="num">7</td>
-</tr>
-<tr>
-<td>Defense</td>
-<td>making</td>
-<td class="num">0.987</td>
-<td class="num">0.986</td>
-<td class="num">0.35</td>
-<td class="num">3</td>
-</tr>
-</tbody>
-</table></div>
-<p>Nothing in the README depends on a distinction smaller than half a point per 100.</p>
-<hr>
-<h2>4. Coordinates</h2>
-<p>Three of the fifteen season files — 2019-20, 2020-21, 2021-22 — are published
-with <code>LOC_X</code> and <code>LOC_Y</code> divided by ten and the origin shifted, which is what you
-get by applying the league's raw-units conversion twice.
-<code>features.normalise_coordinates</code> detects the compression on every season by
-checking whether the maximum absolute x is plausible for a fifty-foot court, and
-inverts it. The independent check is the file's own <code>SHOT_DISTANCE</code> column,
-rounded to the foot: after the repair the recomputed distance agrees with it to
-within 0.49 feet on average in every season, and the build raises if any season
-exceeds one foot.</p>
-<p>Distance is recomputed from coordinates rather than read from <code>SHOT_DISTANCE</code>,
-because the published column is rounded and the rounding puts visible banding in
-the model's distance splits.</p>
-<hr>
-<h2>5. Split-half reliability</h2>
-<p>For a given half-size <code>n</code>, draw <code>2n</code> attempts without replacement from a
-team-season, split them into two disjoint halves, compute quality and making on
-each, and correlate across team-seasons. Average over repetitions — 200 for the
-full-length figures, 60 for each point on the curve.</p>
-<p>Two details:</p>
-<p><strong>The sample of teams is fixed across the curve.</strong> Every point uses only
-team-seasons with enough attempts to supply the <em>largest</em> split. Without that,
-the curve would be a statement about which teams drop out as the split grows,
-which would flatter the small samples (short seasons have fewer attempts and
-often more extreme teams).</p>
-<p><strong>Spearman-Brown steps a half to a whole</strong>: <code>r_full = 2r / (1 + r)</code>. Reported as
-the <code>*_full</code> columns in <code>output/split_half.csv</code>. It assumes the two halves are
-parallel measurements, which random splitting of a single season makes about as
-true as it gets.</p>
-<hr>
-<h2>6. The noise floor</h2>
-<p>An independent, model-free bound on the same question. For a team with <code>n</code>
-attempts, the sampling variance of its mean residual is <code>Var(points - xPPS) / n</code>,
-and that per-shot variance is estimable from the team's own attempts. Average it
-over the thirty teams in a season and compare to the observed variance of making
-across those teams (<code>output/noise_share.csv</code>):</p>
-<ul>
-<li>2024-25: observed SD 4.29, sampling SD 1.39, implied true SD <strong>4.06</strong></li>
-<li>Across the fifteen seasons, sampling noise accounts for a mean of <strong>13%</strong> of the
-  observed variance in team shot making.</li>
-</ul>
-<p>This agrees with the split-half figure — a reliability of 0.83 implies 17% noise
-— which is the point of computing it two ways.</p>
-<p>The assumption is that a team's attempts are independent draws. They are not
-quite: shots within a game share an opponent, a venue and a night's shooting
-touch. Positive within-game correlation would make the true sampling variance
-<em>larger</em> than this estimate, so 13% is a floor on the noise and 4.06 is a ceiling
-on the true spread.</p>
-<hr>
-<h2>7. Correcting the year-over-year correlation</h2>
-<p>The raw year-to-year correlation confounds two things: how much of a trait a team
-keeps, and how precisely one season measures the trait at all. The standard
-correction divides by the reliability:</p>
-<pre><code>persistence = r(season t, season t+1) / reliability(one season)
-</code></pre>
-<p>This is the disattenuation formula with the same variable on both sides, so both
-reliabilities are equal and the denominator is not squared under a root. Applied
-to <code>output/split_half.csv</code> and <code>output/year_over_year.csv</code>, it gives the
-corrected column in the README's second table.</p>
-<p>What it licenses: a comparison between components measured with different
-precision. Offensive quality is measured at 0.98 and making at 0.83, so their raw
-correlations of 0.63 and 0.65 are not comparable as they stand.</p>
-<p>What it does not license: treating 0.78 as a forecast. It is the correlation you
-would observe between two <em>perfectly measured</em> seasons, and no such season
-exists. For projection, the raw number is the one to use.</p>
-<p>There is also a substantive confound underneath the whole exercise, and it is the
-biggest limitation in the project. A public shot file has no defender data, so
-every point of value a team creates by getting a shooter open lands in "making"
-rather than "quality". Some of making's persistence is therefore persistent
-spacing, not persistent shooting. I cannot separate them here, and I would not
-trust anyone who claimed to without tracking data.</p>
-<hr>
-<h2>8. The seven-game resample</h2>
-<p><code>quality.series_noise</code> draws <code>n</code> attempts with replacement from a team's own
-2024-25 residuals and records the making figure the sample produces, four
-thousand times. <code>n = 622</code> is the league's mean attempts per team-game in 2024-25
-(88.9) times seven.</p>
-<p>What this holds fixed is the team's shot distribution and its true conversion.
-The only thing varying is which attempts you happened to see. That makes it a
-<strong>floor on the uncertainty</strong>, not a forecast of a series: a playoff opponent
-changes the distribution deliberately, rotations shorten, and the same seven
-games are played against one defense rather than a season's worth. Every one of
-those adds variance.</p>
-<p>Regular-season attempts are used because they are the only attempts in the file.
-The mirror carries no playoff games.</p>
-<hr>
-<h2>9. Shrinkage</h2>
-<p><code>quality.shrink</code> multiplies each component by a single published reliability
-factor. It is deliberately the flat version rather than a per-team empirical
-Bayes weight: every team in a season plays 82 games and takes within a few
-hundred attempts of the same number, so a per-team weight would move the ordering
-by nothing and would make the estimator harder to argue with.</p>
-<p>Two factors are applied to the same season. The season-length factor (0.83)
-barely moves anything — a maximum of three places. The series-length factor
-(0.38, with quality shrunk at 0.84 to match) is the interesting one, and the
-README's rise-and-fall table is the difference between them.</p>
-<hr>
-<h2>10. Zone attribution</h2>
-<p><code>zone_surplus</code> splits a team's quality into per-zone contributions:</p>
-<pre><code>from_mix  = 100 (team_share - league_share) (league_value_in_zone - league_value_overall)
-from_look = 100  team_share (team_value_in_zone - league_value_in_zone)
-</code></pre>
-<p>The first is shot selection in the ordinary sense: shooting more often from a
-zone the league scores well in. The second is finding better looks than the
-league <em>inside</em> a zone — a rim attempt is not a fixed thing, and a team that gets
-to the restricted area on cuts rather than contested drives will score above the
-zone's league value before anyone shoots.</p>
-<p>The two sum exactly to the team's quality figure, because the shares and the
-league shares each sum to one. This is checked implicitly by the row totals in
-figure 05 matching <code>output/team_offence.csv</code>.</p>
-<hr>
-<h2>11. What this cannot see</h2>
-<ul>
-<li><strong>Free throws, turnovers, offensive rebounds.</strong> Everything is per shot attempt.
-  A team that gets to the line or takes care of the ball gets no credit here, and
-  none of these numbers is an offensive or defensive rating.</li>
-<li><strong>Who was guarding.</strong> Section 7.</li>
-<li><strong>Playoffs.</strong> Regular season only, through 2024-25.</li>
-<li><strong>Franchise continuity.</strong> Year-over-year pairs are matched on the three-letter
-  abbreviation, so New Jersey to Brooklyn and New Orleans' rename each break the
-  chain. 418 pairs rather than 420.</li>
-<li><strong>Injuries and rotations.</strong> A team-season is one number. San Antonio's 2024-25
-  is a season in which their defensive centerpiece missed the second half of the
-  year, and nothing here adjusts for that.</li>
-</ul>
-<hr>
-<h2>12. What I expected to find and did not</h2>
-<p>I started this expecting shot making to be mostly noise at team level, on the
-strength of how badly opponent three-point percentage repeats — the finding in
-the sibling <code>okc-defence</code> repo, where it comes back at 0.16 year to year. It is
-not. Over a full season, team shot making splits at 0.83 and repeats at 0.65, and
-once you correct for measurement it is the more persistent of the two components
-on both sides of the ball.</p>
-<p>The reason the two results coexist: opponent three-point percentage is a small,
-noisy slice of defensive making, and the rest of it — everything inside the arc —
-repeats far better. Aggregating to the whole shot chart aggregates away the part
-that does not stick.</p>
-<p>What survives from the naive version is the part that matters for a playoff
-series, and it survives for a different reason than I thought. Making is not
-unreal. It is just slow, and a series is short: two 622-attempt samples of the
-same team agree at 0.38, which is not enough to rank anybody.</p>
+<h1>Method and revision notes</h1>
+<p>A team can score efficiently because of the attempts it generates, how it converts them, or both. This study separates a shot-model expectation from actual-minus-expected scoring and compares selected Western teams in the 2024–25 regular season. “Contender” is the historical project label, not a current championship forecast.</p>
+<h2>The historical comparison</h2>
+<p>Values below are points per 100 field-goal attempts relative to the season's league baseline. For the defensive rows, lower opponent scoring is better. The ranks are within that season's source sample.</p>
+<p><a href="../output/contenders.csv">Result table</a></p>
+<p>The residual includes factors missing from the public shot model, including openness and defensive pressure. It is not a direct measurement of shooting skill or luck. Free throws, turnovers, rebounding and total possession efficiency are outside this field-goal decomposition.</p>
+<h2>How the model is evaluated</h2>
+<p><a href="../output/model_fit.csv">Result table</a></p>
+<p>Game-grouped folds separate each scored shot from other shots in its game. The model evaluation is within the historical sample, not a pre-season or playoff forecast. The source coordinates and action labels require the documented era restrictions and sensitivity checks.</p>
+<h2>What the resampling can establish</h2>
+<figure><img loading="lazy" src="../figures/02_reliability_curve.png" alt="Within-season split-sample consistency" /></figure>
+<p>Random subsets of the same team-season describe within-season consistency across sample sizes. They do not reproduce consecutive games or an unfamiliar playoff opponent.</p>
+<figure><img loading="lazy" src="../figures/04_series_bands.png" alt="Independent-shot resampling" /></figure>
+<p>The bands resample individual regular-season attempts independently. Their sample size is chosen to resemble several games' worth of shots, but they omit game-level dependence, tactical adjustments, injuries and rotation changes. They are an illustrative sampling exercise, not playoff-series outcome probabilities. Overlap between bands is not a formal equivalence test.</p>
+<p>Reliability-based shrinkage tables remain available as a sensitivity exercise. Applying a smaller-sample coefficient to a season estimate is a hypothetical adjustment, not evidence that the adjusted value predicts a series.</p>
+<h2>Basketball use</h2>
+<p>These components help frame a scouting question: is the observed field-goal advantage associated with the available shot features or with conversion beyond them? Follow that question with film and possession-level measures before recommending a coverage change.</p>
+<p>The release fixes dependency versions and refreshes the model tables, article and figures together. Use this version's outputs throughout; do not mix in the original unpinned model results.</p>
+<p>The result tables are linked and rendered in the main article. Full algorithms and thresholds are in <code>src/</code>; source bytes are recorded in <code>data/source_manifest.json</code>.</p>
+
 </div></main>
-<footer class="foot"><div class="wrap"><span>contender-shot-quality</span><span>figures and tables regenerated by the pipeline in this repository</span></div></footer>
+<footer class="foot"><div class="wrap"><span>contender-shot-quality</span><span>source, results and validation notes in the repository</span></div></footer>
 </body>
 </html>

@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>The half of a contender you can scout in a week</title>
-<meta name="description" content="San Antonio&#x27;s road out of the West runs through Oklahoma City and four or five other teams that were all better than them in 2024-25. This takes the last full season the public sho">
+<title>Comparing team shot expectations and residual conversion</title>
+<meta name="description" content="A team can score efficiently because of the attempts it generates, how it converts them, or both. This study separates a shot-model expectation from actual-minus-expected scoring a">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700&family=IBM+Plex+Mono:wght@400;500&family=Source+Sans+3:ital,wght@0,400;0,600;1,400&display=swap">
 <style>
 :root{
@@ -99,386 +99,225 @@ figure img{display:block;width:100%;height:auto;border:1px solid var(--rule);bor
 </style>
 </head>
 <body>
-<header class="bar"><div class="wrap"><span class="slug">contender-shot-quality</span><nav><a href="docs/method.html">method</a><a href="https://github.com/jmsmarrelli/contender-shot-quality">repository</a><a href="https://jmsmarrelli.github.io/basketball-analytics/">all projects</a></nav></div></header>
+<header class="bar"><div class="wrap"><span class="slug">contender-shot-quality</span><nav><a href="docs/method.html">method</a></nav></div></header>
 <main><div class="wrap">
-<h1>The half of a contender you can scout in a week</h1>
-<p>San Antonio's road out of the West runs through Oklahoma City and four or five
-other teams that were all better than them in 2024-25. This takes the last full
-season the public shot-chart mirror covers and splits each of those offenses and
-defenses into two numbers: the value of the <strong>looks</strong> a team generated, and what
-its shooters <strong>did</strong> with them.</p>
-<p>Fifteen seasons, 3,060,130 attempts, 17,884 games, 450 team-seasons, 2010-11 to
-2024-25.</p>
-<p><strong>Shot quality is legible after about a week of basketball. Shot making is a real
-team trait that takes most of a season to see — and a seven-game series is not a
-season. Over 622 attempts, the resampling band for the league's best shot-making
-offense overlaps the band for its worst.</strong></p>
-<hr>
-<h2>The two numbers</h2>
-<p>Every attempt gets an expected value, xPPS: the points a league-average shooter
-would be expected to score from that spot, scored by a gradient-boosted model of
-geometry that never saw the game the shot came from. Aggregate over a team's
-season and the arithmetic splits cleanly:</p>
-<pre><code>quality = team expected  -  league expected          the looks
-making  = (team actual - team expected) - (league actual - league expected)
-total   = team actual    -  league actual            = quality + making
-</code></pre>
-<p>All three are points per 100 attempts against that season's league. Nothing is
-per possession — this file has no free throws, no turnovers and no offensive
-rebounds, and pretending otherwise would be inventing data.</p>
-<figure><img loading="lazy" alt="Quality and making" src="figures/01_quality_and_making.png"></figure>
-<p>The first thing the picture says is that the two axes are not the same size. In
-2024-25 the standard deviation across the thirty teams was <strong>1.90 on quality and
-4.29 on making</strong>. Nine of the ten best offenses in the league got there mainly on
-making. Whatever era of shot-selection arbitrage produced the 2015-20 three-point
-boom, it is over: teams no longer separate themselves much by <em>where</em> they shoot.</p>
-<hr>
-<h2>The seven teams</h2>
-<figure><img loading="lazy" alt="The split" src="figures/03_contender_split.png"></figure>
+<h1>Comparing team shot expectations and residual conversion</h1>
+<p>A team can score efficiently because of the attempts it generates, how it converts them, or both. This study separates a shot-model expectation from actual-minus-expected scoring and compares selected Western teams in the 2024–25 regular season. “Contender” is the historical project label, not a current championship forecast.</p>
+<h2>The historical comparison</h2>
+<p>Values below are points per 100 field-goal attempts relative to the season's league baseline. For the defensive rows, lower opponent scoring is better. The ranks are within that season's source sample.</p>
 <div class="tw"><table>
 <thead>
 <tr>
-<th></th>
-<th>Offense: quality</th>
-<th>making</th>
-<th>total</th>
-<th>Defense: quality</th>
-<th>making</th>
-<th>total</th>
+<th>Side</th>
+<th>Team</th>
+<th>Attempts</th>
+<th>Quality</th>
+<th>Making</th>
+<th>Total</th>
+<th>Quality rank</th>
+<th>Making rank</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td><strong>San Antonio</strong></td>
-<td class="num"><strong>+2.09</strong> (6th)</td>
-<td class="num">−1.89 (20th)</td>
-<td class="num">+0.19</td>
-<td class="num">+1.58 (24th)</td>
-<td class="num">+0.18</td>
-<td class="num">+1.76 (23rd)</td>
+<td>offence</td>
+<td>DEN</td>
+<td class="num">7,307</td>
+<td class="num">-0.184</td>
+<td class="num">6.467</td>
+<td class="num">6.283</td>
+<td class="num">14.000</td>
+<td class="num">1.000</td>
 </tr>
 <tr>
-<td>Oklahoma City</td>
-<td class="num">−0.25</td>
-<td class="num">+3.42</td>
-<td class="num">+3.17 (7th)</td>
-<td class="num">−0.51 (14th)</td>
-<td class="num"><strong>−5.37</strong> (1st)</td>
-<td class="num"><strong>−5.88</strong> (1st)</td>
+<td>offence</td>
+<td>GSW</td>
+<td class="num">7,371</td>
+<td class="num">-2.365</td>
+<td class="num">0.959</td>
+<td class="num">-1.406</td>
+<td class="num">27.000</td>
+<td class="num">14.000</td>
 </tr>
 <tr>
-<td>Denver</td>
-<td class="num">−0.18</td>
-<td class="num"><strong>+6.46</strong> (2nd)</td>
-<td class="num">+6.28 (2nd)</td>
-<td class="num">−0.76</td>
-<td class="num">+0.39</td>
-<td class="num">−0.37</td>
+<td>offence</td>
+<td>HOU</td>
+<td class="num">7,623</td>
+<td class="num">-1.293</td>
+<td class="num">-2.830</td>
+<td class="num">-4.123</td>
+<td class="num">23.000</td>
+<td class="num">22.000</td>
 </tr>
 <tr>
-<td>Minnesota</td>
-<td class="num">+2.00 (7th)</td>
-<td class="num">+0.29</td>
-<td class="num">+2.30</td>
-<td class="num">+0.12</td>
-<td class="num">−2.35</td>
-<td class="num">−2.23 (5th)</td>
+<td>offence</td>
+<td>LAL</td>
+<td class="num">6,973</td>
+<td class="num">-0.633</td>
+<td class="num">3.474</td>
+<td class="num">2.841</td>
+<td class="num">19.000</td>
+<td class="num">8.000</td>
 </tr>
 <tr>
-<td>LA Lakers</td>
-<td class="num">−0.66</td>
-<td class="num">+3.50</td>
-<td class="num">+2.84</td>
-<td class="num">−1.10</td>
-<td class="num">+0.34</td>
-<td class="num">−0.76</td>
+<td>offence</td>
+<td>MIN</td>
+<td class="num">7,151</td>
+<td class="num">2.026</td>
+<td class="num">0.269</td>
+<td class="num">2.295</td>
+<td class="num">7.000</td>
+<td class="num">16.000</td>
 </tr>
 <tr>
-<td>Golden State</td>
-<td class="num">−2.38 (27th)</td>
-<td class="num">+0.97</td>
-<td class="num">−1.41</td>
-<td class="num"><strong>−4.46</strong> (1st)</td>
-<td class="num">+4.11 (28th)</td>
-<td class="num">−0.34</td>
+<td>offence</td>
+<td>OKC</td>
+<td class="num">7,581</td>
+<td class="num">-0.212</td>
+<td class="num">3.384</td>
+<td class="num">3.172</td>
+<td class="num">16.000</td>
+<td class="num">9.000</td>
 </tr>
 <tr>
-<td>Houston</td>
-<td class="num">−1.29</td>
-<td class="num">−2.84</td>
-<td class="num">−4.12 (24th)</td>
-<td class="num">−1.49</td>
-<td class="num">−1.43</td>
-<td class="num">−2.92 (4th)</td>
-</tr>
-</tbody>
-</table></div>
-<p><em>(Defense is what the opponent got, so on that side negative is good.)</em></p>
-<p>Three of these are worth saying out loud.</p>
-<p><strong>San Antonio built the sixth-best set of looks in the league and finished 20th
-at converting them.</strong> Their offense was almost exactly league average overall,
-and none of that was shot selection.</p>
-<p><strong>Oklahoma City's historic defense is 91% conversion.</strong> They forced the 14th-best
-shot chart in the league and then held opponents 5.37 points per 100 below what
-those shots were worth — first by a distance. A coarser five-zone version of the
-same split lives in the sibling <code>okc-defence</code> repo and lands in the same place.</p>
-<p><strong>Golden State forced the worst looks in the NBA and gave four points of it
-back.</strong> Best shot chart in the league, 28th in conversion allowed, net nothing.
-That is either the most unlucky defense of the season or a defense whose scheme
-concedes something the geometry cannot see. The next section is about telling
-those two apart, and it does not fully manage it.</p>
-<hr>
-<h2>How long each half takes to see</h2>
-<p>Take a team-season, split its attempts at random into two disjoint halves,
-measure both numbers on each half, and correlate across teams. Repeat, and vary
-how many attempts each half gets.</p>
-<figure><img loading="lazy" alt="Reliability" src="figures/02_reliability_curve.png"></figure>
-<div class="tw"><table>
-<thead>
-<tr>
-<th>Attempts in each half</th>
-<th>Quality repeats at</th>
-<th>Making repeats at</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>150 (under two games)</td>
-<td class="num">0.56</td>
-<td class="num">0.13</td>
+<td>offence</td>
+<td>SAS</td>
+<td class="num">7,328</td>
+<td class="num">2.070</td>
+<td class="num">-1.876</td>
+<td class="num">0.194</td>
+<td class="num">6.000</td>
+<td class="num">20.000</td>
 </tr>
 <tr>
-<td>622 (a seven-game series)</td>
-<td class="num"><strong>0.84</strong></td>
-<td class="num"><strong>0.38</strong></td>
+<td>defence</td>
+<td>DEN</td>
+<td class="num">7,597</td>
+<td class="num">-0.741</td>
+<td class="num">0.373</td>
+<td class="num">-0.368</td>
+<td class="num">12.000</td>
+<td class="num">18.000</td>
 </tr>
 <tr>
-<td>1,100 (about a quarter of a season)</td>
-<td class="num">0.90</td>
-<td class="num">0.52</td>
+<td>defence</td>
+<td>GSW</td>
+<td class="num">7,090</td>
+<td class="num">-4.443</td>
+<td class="num">4.099</td>
+<td class="num">-0.344</td>
+<td class="num">1.000</td>
+<td class="num">28.000</td>
 </tr>
 <tr>
-<td>2,536 (half a season)</td>
-<td class="num">0.96</td>
-<td class="num">0.71</td>
-</tr>
-</tbody>
-</table></div>
-<p>Stepped up to full-season length with Spearman-Brown, a season measures quality
-at <strong>0.98</strong> and making at <strong>0.83</strong> — so over 82 games, both are real. Making is
-not noise. It is just slow.</p>
-<p>And then the part that surprised me. Correlate a franchise's season against its
-next one across 418 consecutive pairs, and divide by the within-season
-reliability to separate <em>how much a team keeps</em> from <em>how well one season
-measures it</em>:</p>
-<div class="tw"><table>
-<thead>
-<tr>
-<th></th>
-<th>Raw year-to-year</th>
-<th>Corrected for measurement</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Offensive quality</td>
-<td class="num">0.63</td>
-<td class="num"><strong>0.64</strong></td>
+<td>defence</td>
+<td>HOU</td>
+<td class="num">7,213</td>
+<td class="num">-1.481</td>
+<td class="num">-1.436</td>
+<td class="num">-2.918</td>
+<td class="num">8.000</td>
+<td class="num">10.000</td>
 </tr>
 <tr>
-<td>Offensive making</td>
-<td class="num">0.65</td>
-<td class="num"><strong>0.78</strong></td>
+<td>defence</td>
+<td>LAL</td>
+<td class="num">7,282</td>
+<td class="num">-1.115</td>
+<td class="num">0.350</td>
+<td class="num">-0.764</td>
+<td class="num">10.000</td>
+<td class="num">17.000</td>
 </tr>
 <tr>
-<td>Defensive quality</td>
-<td class="num">0.74</td>
-<td class="num"><strong>0.76</strong></td>
+<td>defence</td>
+<td>MIN</td>
+<td class="num">7,178</td>
+<td class="num">0.146</td>
+<td class="num">-2.379</td>
+<td class="num">-2.233</td>
+<td class="num">16.000</td>
+<td class="num">6.000</td>
 </tr>
 <tr>
-<td>Defensive making</td>
-<td class="num">0.53</td>
-<td class="num"><strong>0.79</strong></td>
+<td>defence</td>
+<td>OKC</td>
+<td class="num">7,098</td>
+<td class="num">-0.502</td>
+<td class="num">-5.375</td>
+<td class="num">-5.876</td>
+<td class="num">14.000</td>
+<td class="num">1.000</td>
+</tr>
+<tr>
+<td>defence</td>
+<td>SAS</td>
+<td class="num">7,555</td>
+<td class="num">1.571</td>
+<td class="num">0.187</td>
+<td class="num">1.758</td>
+<td class="num">24.000</td>
+<td class="num">16.000</td>
 </tr>
 </tbody>
 </table></div>
-<p>Once you account for how imprecisely one season measures it, <strong>shot making is
-the more persistent trait on both sides of the ball</strong>. Shot selection is a scheme
-choice and schemes change every summer; shooting talent is roster-sticky, and
-part of what lands in "making" is a team's ability to manufacture openness the
-geometry cannot see. Which is a caveat and a finding at the same time, and I have
-not found a way to separate them with this data.</p>
-<hr>
-<h2>What seven games does to it</h2>
-<p>Resample 622 attempts — the league's 88.9 attempts per team-game, times seven —
-from each team's own 2024-25 season, with replacement, four thousand times.
-Nothing changes but how much of the team you get to see.</p>
-<figure><img loading="lazy" alt="Series bands" src="figures/04_series_bands.png"></figure>
-<p>The average band is <strong>4.74 points per 100 wide</strong> in standard deviation. The
-spread of true team making talent across the league, after subtracting the
-sampling variance, is <strong>4.06</strong>. The noise in a single series is larger than the
-entire distribution of the skill. Twenty-nine of the thirty bands cover zero, and
-the top band overlaps the bottom one.</p>
-<p>So: shrink each team's making by the reliability its sample earns, and see what
-moves. At season length the reliability is 0.83 and almost nothing moves — a
-maximum of three places. At series length it is 0.38:</p>
+<p>Source: <a href="output/contenders.csv">contenders.csv</a>.</p>
+<p>The residual includes factors missing from the public shot model, including openness and defensive pressure. It is not a direct measurement of shooting skill or luck. Free throws, turnovers, rebounding and total possession efficiency are outside this field-goal decomposition.</p>
+<h2>How the model is evaluated</h2>
 <div class="tw"><table>
 <thead>
 <tr>
-<th>Biggest risers</th>
-<th></th>
-<th>Biggest fallers</th>
-<th></th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>Atlanta</td>
-<td class="num">+10</td>
-<td>Phoenix</td>
-<td class="num">−10</td>
-</tr>
-<tr>
-<td>Chicago</td>
-<td class="num">+9</td>
-<td>Indiana</td>
-<td class="num">−8</td>
-</tr>
-<tr>
-<td><strong>San Antonio</strong></td>
-<td class="num"><strong>+8</strong></td>
-<td>LA Clippers</td>
-<td class="num">−6</td>
-</tr>
-<tr>
-<td>Minnesota</td>
-<td class="num">+5</td>
-<td>Sacramento</td>
-<td class="num">−6</td>
-</tr>
-</tbody>
-</table></div>
-<p>San Antonio's offense was 18th on the season and is 10th once making is trusted
-only as far as 622 attempts allow. That is not a claim that they were unlucky. It
-is a claim about which of the two numbers a seven-game sample is entitled to move.</p>
-<hr>
-<h2>Where San Antonio's looks come from</h2>
-<figure><img loading="lazy" alt="Zone surplus" src="figures/05_zone_surplus.png"></figure>
-<p>Each cell adds two things: shooting from a zone more than the league does, priced
-at what the league gets there, and finding better looks than the league inside
-the zone. Rows sum to the team's quality figure.</p>
-<p>San Antonio's entire +2.09 is <strong>inside the arc</strong>: +0.96 at the rim and +1.02 in
-the paint off it, with the three-point zones contributing +0.17 between them.
-Minnesota's +2.00 is spread across every zone on the floor. Golden State's −2.38
-is one cell: <strong>−2.54 at the rim</strong>, the largest single-zone deficit among the
-seven, and everything else they do is close to league average.</p>
-<p>That is a scouting note with a shape. A team whose quality edge is one zone deep
-is a team an opponent can attack in one adjustment.</p>
-<hr>
-<h2>Why the model reads geometry and nothing else</h2>
-<p>The model carries no season term and no action type, and both omissions are
-deliberate.</p>
-<p>No season term, because the whole decomposition depends on the yardstick staying
-still while the league moves:</p>
-<figure><img loading="lazy" alt="Yardstick" src="figures/06_league_yardstick.png"></figure>
-<p>The average NBA look was worth most in <strong>2019-20</strong> and by 2024-25 was worth less
-than in any season since 2014-15 — while the three-point share climbed from 38%
-to 42% and scoring went up anyway. The league is taking <em>more</em> threes from
-<em>worse</em> places and making more of them. How much of that is better shooting and
-how much is better spacing, this data cannot say.</p>
-<p>No action type, because the labels moved underneath the sample. Between 2014-15
-and 2015-16 the share of attempts logged as a plain "Jump shot" fell seven points
-in a single off-season and "Floater" more than doubled; across the fifteen years,
-"Layup" went from 12.7% of all attempts to 1.6% and "Pull-up" from 2.4% to 13.0%.
-Players did not change that fast. The vocabulary did. <code>output/action_labels.csv</code>
-has the whole table.</p>
-<p>The model that <em>does</em> read action type is fit anyway, as a sensitivity check.
-Across the thirty 2024-25 teams the two agree at r = 0.93 to 0.99 depending on
-the component, with a mean gap of 0.35 to 0.50 points per 100 and a worst-case
-move of eleven places on offensive quality. Every claim above survives it;
-<code>output/spec_sensitivity.csv</code> is the receipt.</p>
-<p>Fit quality, out of fold with folds grouped by game, 3.06 million attempts:</p>
-<div class="tw"><table>
-<thead>
-<tr>
-<th></th>
+<th>Specification</th>
 <th>Log loss</th>
-<th>Brier</th>
-<th>AUC</th>
+<th>Brier score</th>
+<th>ROC AUC</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Geometry only</td>
-<td class="num">0.6534</td>
-<td class="num">0.2308</td>
+<td>Geometry model</td>
+<td class="num">0.653</td>
+<td class="num">0.231</td>
 <td class="num">0.634</td>
 </tr>
 <tr>
-<td>Plus action type, clock, venue</td>
-<td class="num">0.6361</td>
-<td class="num">0.2235</td>
+<td>Recorded-context model</td>
+<td class="num">0.636</td>
+<td class="num">0.224</td>
 <td class="num">0.665</td>
 </tr>
 <tr>
-<td>League make rate, constant</td>
-<td class="num">0.6902</td>
-<td class="num">0.2485</td>
+<td>Constant-probability baseline</td>
+<td class="num">0.690</td>
+<td class="num">0.249</td>
 <td class="num">0.500</td>
 </tr>
 </tbody>
 </table></div>
-<p>Across twenty equal-count bins the geometry model's predicted and observed make
-rates differ by at most 0.0024.</p>
-<hr>
-<h2>What this is not</h2>
-<ul>
-<li><strong>Not an offensive rating.</strong> Per attempt, never per possession. Free throws,
-  turnovers and offensive rebounds are all outside the file.</li>
-<li><strong>Openness is invisible.</strong> No defender data exists in a public shot file, so
-  every point of value a team creates by getting a shooter <em>open</em> is scored as
-  shot making rather than shot quality. This is the reason the making component
-  persists as well as it does, and nothing here separates the spacing from the
-  shooting.</li>
-<li><strong>The series arithmetic is a floor, not a forecast.</strong> Resampling a team's own
-  regular-season attempts holds its shot distribution fixed. A playoff opponent
-  changes that distribution deliberately, which adds uncertainty rather than
-  removing it.</li>
-<li><strong>Regular season only, through 2024-25</strong>, which is where the mirror ends. The
-  seven-game figure is 622 regular-season attempts, not a playoff series.</li>
-<li><strong>Team abbreviations, not franchises.</strong> The year-over-year pairs break at New
-  Jersey's move to Brooklyn and New Orleans' rename, which is why there are 418
-  pairs and not 420.</li>
-</ul>
-<hr>
-<h2>Running it</h2>
-<pre><code class="language-bash">pip install -r requirements.txt
-python src/run_01_build.py   # 15 season files -&gt; 3.06M model-ready attempts
-python src/run_02_model.py   # two specifications, scored out of fold        (~5 min)
-python src/run_03_teams.py   # the decomposition, reliability, figures 01-06 (~5 min)
+<p>Source: <a href="output/model_fit.csv">model_fit.csv</a>.</p>
+<p>Game-grouped folds separate each scored shot from other shots in its game. The model evaluation is within the historical sample, not a pre-season or playoff forecast. The source coordinates and action labels require the documented era restrictions and sensitivity checks.</p>
+<h2>What the resampling can establish</h2>
+<figure><img loading="lazy" src="figures/02_reliability_curve.png" alt="Within-season split-sample consistency" /></figure>
+<p>Random subsets of the same team-season describe within-season consistency across sample sizes. They do not reproduce consecutive games or an unfamiliar playoff opponent.</p>
+<figure><img loading="lazy" src="figures/04_series_bands.png" alt="Independent-shot resampling" /></figure>
+<p>The bands resample individual regular-season attempts independently. Their sample size is chosen to resemble several games' worth of shots, but they omit game-level dependence, tactical adjustments, injuries and rotation changes. They are an illustrative sampling exercise, not playoff-series outcome probabilities. Overlap between bands is not a formal equivalence test.</p>
+<p>Reliability-based shrinkage tables remain available as a sensitivity exercise. Applying a smaller-sample coefficient to a season estimate is a hypothetical adjustment, not evidence that the adjusted value predicts a series.</p>
+<h2>Basketball use</h2>
+<p>These components help frame a scouting question: is the observed field-goal advantage associated with the available shot features or with conversion beyond them? Follow that question with film and possession-level measures before recommending a coverage change.</p>
+<h2>Reproduce</h2>
+<p>The historical analysis used Python 3.12 with the pinned dependencies below. From this repository:</p>
+<pre><code class="language-bash">python3.12 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+make fetch-data PY=python
+make all PY=python
+make report site PY=python
 </code></pre>
-<p>Or <code>make all</code>. <code>make figures</code> re-cuts every chart from the tables already in
-<code>output/</code> without refitting anything.</p>
-<pre><code>src/
-  config.py       paths, seasons, the seven teams, the sample floors
-  features.py     raw rows -&gt; geometry, including the coordinate repair
-  model.py        the two specifications and the out-of-fold fit
-  quality.py      the decomposition, split-half reliability, the series resample
-  figures.py      every chart, drawn from the tables and nothing else
-  style.py        one place that decides what a figure looks like
-  run_0*.py       the pipeline, in order
-output/           every number quoted above, as CSV
-figures/          six figures, regenerated from scratch by the pipeline
-docs/method.md    the longer argument, including what shot making is really made of
-</code></pre>
-<h2>Data</h2>
-<p>Shot-level data from
-<a href="https://github.com/DomSamangy/NBA_Shots_04_24">DomSamangy/NBA_Shots_04_24</a>, a
-mirror of the league's public shot chart endpoint. <code>data/README.md</code> has the fetch
-step, the coordinate repair, and the list of things a shot file cannot see.</p>
-<h2>License</h2>
-<p>MIT. See <code>LICENSE</code>.</p>
+<p><code>make all</code> verifies source hashes before running the analyses in order. A missing or changed input stops the build. Data downloads need network access; article rendering uses the included result tables. See <a href="data/source_manifest.json">the source manifest</a>, <a href="docs/method.md">method notes</a> and <a href="VALIDATION_CURRENT.md">current validation record</a> for the distinction between a source rebuild and checks of delivered outputs.</p>
+<p>Season keys in CSV files use the <strong>ending year</strong>: <code>2025</code> means 2024–25. Display tables use full season labels. The MIT license covers code; third-party data retain their providers' rights and terms.</p>
+<p><a href="https://github.com/jmsmarrelli/basketball-analytics">Portfolio</a> · <a href="PROVENANCE.md">AI assistance and provenance</a></p>
+
 </div></main>
-<footer class="foot"><div class="wrap"><span>contender-shot-quality</span><span>figures and tables regenerated by the pipeline in this repository</span></div></footer>
+<footer class="foot"><div class="wrap"><span>contender-shot-quality</span><span>source, results and validation notes in the repository</span></div></footer>
 </body>
 </html>
